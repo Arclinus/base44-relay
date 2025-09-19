@@ -1,6 +1,6 @@
 export const config = {
   api: {
-    bodyParser: true, // Vercel parses JSON automatically
+    bodyParser: true, // Let Vercel parse JSON automatically
   },
 };
 
@@ -10,20 +10,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Receive full Shotstack payload
     const payload = req.body;
     console.log("Received callback:", payload);
 
-    const videoUrl = payload?.output?.url || payload?.url;
-
-    // Forward payload to Base44 (or your test endpoint like webhook.site)
+    // Forward the payload *exactly as it came in* to Base44
     const forwardRes = await fetch(process.env.BASE44_CALLBACK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status: payload.status,
-        videoUrl,
-        originalPayload: payload,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!forwardRes.ok) {
