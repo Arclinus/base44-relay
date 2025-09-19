@@ -4,25 +4,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const payload = req.body; // callback from provider
+    // Parse JSON from request
+    const payload = await req.json(); 
     console.log("Received callback:", payload);
 
-    // Extract video URL if available
     const videoUrl = payload?.output?.url || payload?.url;
 
     // Forward to Base44
-    const response = await fetch(process.env.BASE44_CALLBACK_URL, {
+    const base44Res = await fetch(process.env.BASE44_CALLBACK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         status: payload.status,
         videoUrl,
-        originalPayload: payload, // keep full data if needed
+        originalPayload: payload
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Base44 responded with ${response.status}`);
+    if (!base44Res.ok) {
+      throw new Error(`Base44 responded with ${base44Res.status}`);
     }
 
     res.status(200).json({ ok: true });
